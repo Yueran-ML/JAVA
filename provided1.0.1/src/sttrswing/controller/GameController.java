@@ -224,12 +224,14 @@ public class GameController extends JFrame {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Save Game");
         fileChooser.setAcceptAllFileFilterUsed(false);
-        fileChooser.setFileFilter(new FileNameExtensionFilter(SAVE_FILE_DESCRIPTION, SAVE_FILE_EXTENSION));
+        fileChooser.setFileFilter(new FileNameExtensionFilter(SAVE_FILE_DESCRIPTION,
+                SAVE_FILE_EXTENSION));
 
         File projectRoot = new File(System.getProperty("user.dir"));
         File dataDirectory = new File(projectRoot, DATA_DIR);
         fileChooser.setCurrentDirectory(projectRoot);
-        fileChooser.setSelectedFile(new File(dataDirectory, DEFAULT_SAVE_FILE_NAME + "." + SAVE_FILE_EXTENSION));
+        fileChooser.setSelectedFile(new File(dataDirectory, DEFAULT_SAVE_FILE_NAME
+                + "." + SAVE_FILE_EXTENSION));
 
         int userSelection = fileChooser.showSaveDialog(this);
         if (userSelection != JFileChooser.APPROVE_OPTION) {
@@ -238,7 +240,8 @@ public class GameController extends JFrame {
 
         File selectedFile = fileChooser.getSelectedFile();
         if (!selectedFile.getName().toLowerCase().endsWith("." + SAVE_FILE_EXTENSION)) {
-            selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + "." + SAVE_FILE_EXTENSION);
+            selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName()
+                    + "." + SAVE_FILE_EXTENSION);
         }
 
         try {
@@ -271,7 +274,8 @@ public class GameController extends JFrame {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Load Game");
         fileChooser.setAcceptAllFileFilterUsed(false);
-        fileChooser.setFileFilter(new FileNameExtensionFilter(SAVE_FILE_DESCRIPTION, SAVE_FILE_EXTENSION));
+        fileChooser.setFileFilter(new FileNameExtensionFilter(SAVE_FILE_DESCRIPTION,
+                SAVE_FILE_EXTENSION));
 
         File projectRoot = new File(System.getProperty("user.dir"));
         File dataDirectory = new File(projectRoot, DATA_DIR);
