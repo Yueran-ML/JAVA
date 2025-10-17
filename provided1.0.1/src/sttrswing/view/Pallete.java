@@ -35,6 +35,10 @@ public enum Pallete {
   GREENPALE("#baf589"),
   ORANGE("#c66427");
 
+  public static final Color BACKGROUND_COLOR = BLACK.color();
+  public static final Color TEXT_COLOR = WHITE.color();
+  public static final Color GRID_COLOR = GREY.color();
+
   private final String hex;
 
   Pallete(final String hex) {
