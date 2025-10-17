@@ -24,13 +24,13 @@ public class EnterpriseStatus extends View {
         super(TITLE);
         GameModel gameModel = Objects.requireNonNull(game, "game");
         this.setLayout(new BorderLayout());
-        this.setBackground(Pallete.BACKGROUND_COLOR);
+        this.setBackground(Pallete.BLACK.color());
         this.setOpaque(true);
 
         JTable table = buildStatusTable(gameModel);
         JTableHeader header = table.getTableHeader();
-        header.setBackground(Pallete.BACKGROUND_COLOR);
-        header.setForeground(Pallete.TEXT_COLOR);
+        header.setBackground(Pallete.BLACK.color());
+        header.setForeground(Pallete.WHITE.color());
         header.setReorderingAllowed(false);
         header.setResizingAllowed(false);
         header.setOpaque(true);
@@ -58,9 +58,9 @@ public class EnterpriseStatus extends View {
         };
 
         JTable table = new JTable(model);
-        table.setBackground(Pallete.BACKGROUND_COLOR);
-        table.setForeground(Pallete.TEXT_COLOR);
-        table.setGridColor(Pallete.GRID_COLOR);
+        table.setBackground(Pallete.BLACK.color());
+        table.setForeground(Pallete.WHITE.color());
+        table.setGridColor(Pallete.GREY.color());
         table.setRowSelectionAllowed(false);
         table.setColumnSelectionAllowed(false);
         table.setCellSelectionEnabled(false);

@@ -37,19 +37,19 @@ public class Slider extends JPanel {
 
     valueList = new JList<>(values);
     valueList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    valueList.setBackground(Pallete.BACKGROUND_COLOR);
-    valueList.setForeground(Pallete.TEXT_COLOR);
-    valueList.setSelectionBackground(Pallete.SELECTION_BACKGROUND_COLOR);
-    valueList.setSelectionForeground(Pallete.SELECTION_TEXT_COLOR);
+    valueList.setBackground(Pallete.BLACK.color());
+    valueList.setForeground(Pallete.WHITE.color());
+    valueList.setSelectionBackground(Pallete.BLUE.color());
+    valueList.setSelectionForeground(Pallete.WHITE.color());
     if (values.length > 0) {
       valueList.setSelectedIndex(0);
     }
 
     final JScrollPane scrollPane = new JScrollPane(valueList);
-    scrollPane.getViewport().setBackground(Pallete.BACKGROUND_COLOR);
+    scrollPane.getViewport().setBackground(Pallete.BLACK.color());
 
     setLayout(new BorderLayout());
-    setBackground(Pallete.BACKGROUND_COLOR);
+    setBackground(Pallete.BLACK.color());
     add(scrollPane, BorderLayout.CENTER);
   }
 

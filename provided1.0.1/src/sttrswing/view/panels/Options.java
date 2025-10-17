@@ -28,7 +28,7 @@ public class Options extends JPanel {
         this.game = Objects.requireNonNull(game, "game");
         this.controller = Objects.requireNonNull(controller, "controller");
 
-        this.setBackground(Pallete.BACKGROUND_COLOR);
+        this.setBackground(Pallete.BLACK.color());
         this.setOpaque(true);
 
         addOptionButton("Quadrant Navigation", () -> this.controller.setQuadrantNavigationView(this.game));
@@ -42,8 +42,8 @@ public class Options extends JPanel {
 
     private void addOptionButton(String label, Runnable action) {
         JButton button = new JButton(label);
-        button.setBackground(Pallete.BUTTON_COLOR);
-        button.setForeground(Pallete.TEXT_COLOR);
+        button.setBackground(Pallete.GREY.color());
+        button.setForeground(Pallete.WHITE.color());
         button.addActionListener(event -> action.run());
         button.setFocusPainted(false);
         button.setOpaque(true);
