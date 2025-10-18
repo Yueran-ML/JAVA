@@ -4,16 +4,15 @@ import java.awt.GridLayout;
 import java.util.Objects;
 
 import javax.swing.JButton;
-import javax.swing.JPanel;
-
 import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.Pallete;
+import sttrswing.view.View;
 
 /**
  * Panel presenting navigation and combat options for the player.
  */
-public class Options extends JPanel {
+public class Options extends View {
 
     private static final int ROWS = 7;
     private static final int COLUMNS = 1;
@@ -24,10 +23,11 @@ public class Options extends JPanel {
     private final GameController controller;
 
     public Options(GameModel game, GameController controller) {
-        super(new GridLayout(ROWS, COLUMNS, H_GAP, V_GAP));
+        super("Options");
         this.game = Objects.requireNonNull(game, "game");
         this.controller = Objects.requireNonNull(controller, "controller");
 
+        this.setLayout(new GridLayout(ROWS, COLUMNS, H_GAP, V_GAP));
         this.setBackground(Pallete.BLACK.color());
         this.setOpaque(true);
 

@@ -3,8 +3,6 @@ package sttrswing.view;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
-import javax.swing.JPanel;
-
 /**
  * A view that arranges up to four child views in a 2x2 grid layout.
  */
@@ -30,13 +28,6 @@ public class StandardLayoutView extends View {
         this.viewPanels.add(view);
         this.add(view);
         return this;
-    }
-
-    public StandardLayoutView addViewPanel(JPanel panel) {
-        if (panel instanceof View viewPanel) {
-            return addViewPanel(viewPanel);
-        }
-        throw new IllegalArgumentException("Panel must extend View");
     }
 
     public ArrayList<View> getViewPanels() {

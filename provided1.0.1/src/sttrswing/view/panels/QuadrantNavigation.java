@@ -6,16 +6,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
-import javax.swing.JPanel;
 import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.Pallete;
+import sttrswing.view.View;
 import sttrswing.view.guicomponents.MapSquare;
 
 /**
  * Panel that allows in-quadrant navigation by clicking on a sector of the quadrant grid.
  */
-public class QuadrantNavigation extends JPanel {
+public class QuadrantNavigation extends View {
 
   private static final int GRID_SIZE = 8;
   private static final String EMPTY_SYMBOL = "   ";
@@ -30,6 +30,7 @@ public class QuadrantNavigation extends JPanel {
    * @param controller the controller used to switch back to the default view after movement.
    */
   public QuadrantNavigation(final GameModel game, final GameController controller) {
+    super("Quadrant Navigation");
     this.game = Objects.requireNonNull(game, "game");
     this.controller = Objects.requireNonNull(controller, "controller");
     this.setLayout(new GridLayout(GRID_SIZE, GRID_SIZE));
@@ -71,7 +72,7 @@ public class QuadrantNavigation extends JPanel {
       int course = calculateCourse(deltaX, deltaY);
       this.game.moveWithinQuadrant(course, distance);
     }
-    this.controller.setDefaultView(this.game);
+    this.controller.setDefaultView(new QuadrantNavigation(this.game, this.controller));
   }
 
   private int calculateCourse(final int deltaX, final int deltaY) {

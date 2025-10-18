@@ -9,11 +9,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.Pallete;
+import sttrswing.view.View;
 
 /**
  * Panel that displays the long-range scan of the quadrants surrounding the Enterprise.
  */
-public class NearbyQuadrantScan extends JPanel {
+public class NearbyQuadrantScan extends View {
 
   private static final int GRID_ROWS = 3;
   private static final int GRID_COLUMNS = 3;
@@ -26,6 +27,7 @@ public class NearbyQuadrantScan extends JPanel {
    * @param game the game model providing the surrounding quadrant information
    */
   public NearbyQuadrantScan(final GameModel game) {
+    super("Long Range Scan");
     Objects.requireNonNull(game, "game");
     Map<String, String> surrounding =
         Objects.requireNonNull(game.getSurroundingQuadrants(), "surroundingQuadrants");
