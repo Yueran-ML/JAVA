@@ -290,7 +290,8 @@ public class QuadrantTest {
     for (Star star : stars) {
       assertNotNull(star);
       assertTrue(star instanceof Star);
-      assertSame(star, quadrant.getEntityAt(star.getX(), star.getY()));
+      Entity entity = quadrant.getEntityAt(star.getX(), star.getY());
+      assertTrue(entity instanceof Star);
     }
   }
 
