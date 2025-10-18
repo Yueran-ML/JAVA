@@ -119,6 +119,20 @@ public class KlingonTest {
   }
 
   @Test
+  public void testHitWithZeroDamage() {
+    // Arrange
+    Klingon klingon = new Klingon(4, 4);
+    int initialEnergy = getEnergy(klingon);
+
+    // Act
+    klingon.hit(0);
+
+    // Assert
+    assertEquals(initialEnergy, getEnergy(klingon));
+    assertFalse(klingon.isMarkedForRemoval());
+  }
+
+  @Test
   public void testIsAlive() {
     // Arrange
     Klingon klingon = new Klingon(0, 0);

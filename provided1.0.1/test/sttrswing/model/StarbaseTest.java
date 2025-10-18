@@ -117,6 +117,37 @@ public class StarbaseTest {
   }
 
   @Test
+  public void testHealShieldsRestoresToMaximum() {
+    // Arrange
+    Starbase starbase = new Starbase(4, 4);
+    Enterprise enterprise = new Enterprise(5, 5, 2900, 300, 4);
+    int starbaseEnergy = getEnergy(starbase);
+    int expectedEnergy = Math.min(enterprise.energy() + starbaseEnergy, 3000);
+
+    // Act
+    starbase.attemptHeal(enterprise);
+
+    // Assert
+    assertEquals(expectedEnergy, enterprise.energy());
+    assertEquals(0, getEnergy(starbase));
+  }
+
+  @Test
+  public void testHealShieldsWithLowEnergyEnterprise() {
+    // Arrange
+    Starbase starbase = new Starbase(4, 5);
+    Enterprise enterprise = new Enterprise(5, 6, 1, 200, 1);
+    int expectedEnergy = Math.min(enterprise.energy() + getEnergy(starbase), 3000);
+
+    // Act
+    starbase.attemptHeal(enterprise);
+
+    // Assert
+    assertEquals(expectedEnergy, enterprise.energy());
+    assertEquals(0, getEnergy(starbase));
+  }
+
+  @Test
   public void testAttemptHealRequiresAdjacency() {
     // Arrange
     Starbase starbase = new Starbase(0, 0);

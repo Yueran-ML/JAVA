@@ -45,12 +45,56 @@ public class EntityTest {
   }
 
   @Test
+  public void testSetXAtBoundaries() {
+    TestEntity entity = new TestEntity(3, 3);
+
+    entity.setX(0);
+    assertEquals(0, entity.getX());
+
+    entity.setX(7);
+    assertEquals(7, entity.getX());
+  }
+
+  @Test
+  public void testSetXAllowsOutOfBounds() {
+    TestEntity entity = new TestEntity(3, 3);
+
+    entity.setX(-1);
+    assertEquals(-1, entity.getX());
+
+    entity.setX(8);
+    assertEquals(8, entity.getX());
+  }
+
+  @Test
   public void testSetY() {
     TestEntity entity = new TestEntity(0, 0);
 
     entity.setY(-4);
 
     assertEquals(-4, entity.getY());
+  }
+
+  @Test
+  public void testSetYAtBoundaries() {
+    TestEntity entity = new TestEntity(3, 3);
+
+    entity.setY(0);
+    assertEquals(0, entity.getY());
+
+    entity.setY(7);
+    assertEquals(7, entity.getY());
+  }
+
+  @Test
+  public void testSetYAllowsOutOfBounds() {
+    TestEntity entity = new TestEntity(3, 3);
+
+    entity.setY(-1);
+    assertEquals(-1, entity.getY());
+
+    entity.setY(8);
+    assertEquals(8, entity.getY());
   }
 
   @Test
@@ -71,6 +115,19 @@ public class EntityTest {
 
     assertEquals(3, entity.getX());
     assertEquals(2, entity.getY());
+  }
+
+  @Test
+  public void testAdjustPositionAcrossBoundaries() {
+    TestEntity entity = new TestEntity(0, 0);
+
+    entity.adjustPosition(-1, -1);
+    assertEquals(-1, entity.getX());
+    assertEquals(-1, entity.getY());
+
+    entity.adjustPosition(9, 10);
+    assertEquals(8, entity.getX());
+    assertEquals(9, entity.getY());
   }
 
   @Test
