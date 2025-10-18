@@ -43,7 +43,7 @@ public class Options extends View {
     private void addOptionButton(String label, Runnable action) {
         JButton button = new JButton(label);
         button.setBackground(Pallete.GREY.color());
-        button.setForeground(Pallete.WHITE.color());
+        button.setForeground(Pallete.BLACK.color());
         button.addActionListener(event -> action.run());
         button.setFocusPainted(false);
         button.setOpaque(true);
