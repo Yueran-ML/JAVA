@@ -4,214 +4,209 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * GameLoader is responsible for loading the game state from a .trek file and reconstructing the
- * model entities.
- */
 public class GameLoader {
 
   private static final String ENTERPRISE_PREFIX = "[e]";
   private static final String QUADRANT_PREFIX = "[q]";
 
   private final String path;
-  private String cachedContent;
+  private String content;
   private boolean loadAttempted;
-  private boolean lastLoadSuccessful;
+  private boolean loadSucceeded;
 
   public GameLoader(String path) {
     if (path == null || path.isBlank()) {
       throw new IllegalArgumentException("Path must not be null or blank.");
     }
     this.path = path;
-    this.cachedContent = null;
-    this.loadAttempted = false;
-    this.lastLoadSuccessful = false;
   }
 
   public void load() {
     this.loadAttempted = true;
     try {
-      this.cachedContent = Files.readString(Path.of(this.path));
-      this.lastLoadSuccessful = true;
-    } catch (IOException e) {
-      this.cachedContent = null;
-      this.lastLoadSuccessful = false;
+      this.content = Files.readString(Path.of(this.path));
+      this.loadSucceeded = true;
+    } catch (IOException ex) {
+      this.content = null;
+      this.loadSucceeded = false;
     }
   }
 
   public Boolean success() {
-    if (!this.loadAttempted) {
-      return Boolean.FALSE;
-    }
-    return this.lastLoadSuccessful;
+    return this.loadAttempted && this.loadSucceeded;
   }
 
   public Enterprise buildEnterprise() {
-    ensureContentIsAvailable();
-    String line = enterpriseLine();
-    try {
-      int x = parseLineForX(line);
-      int y = parseLineForY(line);
-      int energy = parseLineForEnergy(line);
-      int shields = parseLineForShields(line);
-      int torpedoes = parseLineForTorpedoes(line);
-      return new Enterprise(x, y, energy, shields, torpedoes);
-    } catch (IOException e) {
-      throw new IllegalStateException("Unable to parse enterprise data.", e);
+    String cached = ensureContent();
+    Enterprise enterprise = null;
+    for (String rawLine : splitLines(cached)) {
+      String line = rawLine.trim();
+      if (line.isEmpty()) {
+        continue;
+      }
+      if (line.startsWith(ENTERPRISE_PREFIX)) {
+        try {
+          int x = parseLineForX(line);
+          int y = parseLineForY(line);
+          int energy = parseLineForEnergy(line);
+          int shields = parseLineForShields(line);
+          int torpedoes = parseLineForTorpedoes(line);
+          enterprise = new Enterprise(x, y, energy, shields, torpedoes);
+        } catch (IOException e) {
+          throw new IllegalStateException("Failed to parse enterprise line", e);
+        }
+        break;
+      }
     }
+    if (enterprise == null) {
+      throw new IllegalArgumentException("Missing enterprise data in loaded content.");
+    }
+    return enterprise;
   }
 
   public Galaxy buildGalaxy() {
-    ensureContentIsAvailable();
-    ArrayList<String> lines = galaxyLines();
-    if (lines.isEmpty()) {
-      throw new IllegalStateException("No quadrant data present in cached content.");
-    }
-    ArrayList<Quadrant> quadrants = new ArrayList<>();
-    for (String line : lines) {
-      try {
-        int x = parseLineForX(line);
-        int y = parseLineForY(line);
-        Map<String, Integer> counts = parseLineForQuadrantSymbol(line);
-        Integer stars = counts.get("stars");
-        Integer starbases = counts.get("starbases");
-        Integer klingons = counts.get("klingons");
-        if (stars == null || starbases == null || klingons == null) {
-          throw new IOException("Missing counts for quadrant.");
+    String cached = ensureContent();
+    List<Quadrant> quadrants = new ArrayList<>();
+    for (String rawLine : splitLines(cached)) {
+      String line = rawLine.trim();
+      if (line.isEmpty()) {
+        continue;
+      }
+      if (line.startsWith(QUADRANT_PREFIX)) {
+        try {
+          int x = parseLineForX(line);
+          int y = parseLineForY(line);
+          Map<String, Integer> symbolCounts = parseLineForQuadrantSymbol(line);
+          Integer stars = symbolCounts.get("stars");
+          Integer starbases = symbolCounts.get("starbases");
+          Integer klingons = symbolCounts.get("klingons");
+          if (stars == null || starbases == null || klingons == null) {
+            throw new IllegalStateException("Quadrant symbol map missing required entries.");
+          }
+          quadrants.add(new Quadrant(x, y, starbases, klingons, stars));
+        } catch (IOException e) {
+          throw new IllegalStateException("Failed to parse quadrant line", e);
         }
-        quadrants.add(new Quadrant(x, y, starbases, klingons, stars));
-      } catch (IOException e) {
-        throw new IllegalStateException("Unable to parse quadrant data.", e);
       }
     }
-    return new Galaxy(quadrants);
+    if (quadrants.isEmpty()) {
+      throw new IllegalArgumentException("Missing quadrant data in loaded content.");
+    }
+    return new Galaxy(new ArrayList<>(quadrants));
   }
 
   public int parseLineForX(String line) throws IOException {
-    return parseIntegerToken(line, "x:");
+    return parseIntegerValue(line, "x:");
   }
 
   public int parseLineForY(String line) throws IOException {
-    return parseIntegerToken(line, "y:");
+    return parseIntegerValue(line, "y:");
+  }
+
+  public int parseLineForEnergy(String line) throws IOException {
+    return parseIntegerValue(line, "e:");
+  }
+
+  public int parseLineForShields(String line) throws IOException {
+    return parseIntegerValue(line, "s:");
+  }
+
+  public int parseLineForTorpedoes(String line) throws IOException {
+    return parseIntegerValue(line, "t:");
   }
 
   public Map<String, Integer> parseLineForQuadrantSymbol(String line) throws IOException {
     if (line == null) {
-      throw new IOException("Line cannot be null.");
+      throw new IOException("Line must not be null.");
     }
-    String trimmed = line.trim();
-    int index = trimmed.indexOf("s:");
-    if (index < 0) {
-      throw new IOException("Quadrant symbol token 's:' missing.");
+    int tokenIndex = line.indexOf("s:");
+    if (tokenIndex < 0) {
+      throw new IOException("Missing symbol declaration in line: " + line);
     }
-    int start = index + 2;
+    int start = tokenIndex + 2;
+    while (start < line.length() && Character.isWhitespace(line.charAt(start))) {
+      start++;
+    }
     int end = start;
-    while (end < trimmed.length() && Character.isDigit(trimmed.charAt(end))) {
+    while (end < line.length() && Character.isDigit(line.charAt(end))) {
       end++;
     }
-    if (end == start) {
-      throw new IOException("Quadrant symbol missing digit sequence.");
+    if (end <= start) {
+      throw new IOException("Symbol does not contain digits: " + line);
     }
-    String symbol = trimmed.substring(start, end);
+    String symbol = line.substring(start, end);
     if (symbol.length() != 3) {
-      throw new IOException("Quadrant symbol must be exactly three digits.");
+      throw new IOException("Invalid quadrant symbol length: " + symbol);
     }
     int stars = parseDigit(symbol.charAt(0));
     int starbases = parseDigit(symbol.charAt(1));
     int klingons = parseDigit(symbol.charAt(2));
-    Map<String, Integer> result = new HashMap<>();
-    result.put("stars", stars);
-    result.put("starbases", starbases);
-    result.put("klingons", klingons);
-    return result;
+    Map<String, Integer> counts = new LinkedHashMap<>();
+    counts.put("stars", stars);
+    counts.put("starbases", starbases);
+    counts.put("klingons", klingons);
+    return counts;
   }
 
+  @Override
   public String toString() {
     return "GameLoader[path=" + this.path + ", success=" + success() + "]";
   }
 
-  public String enterpriseLine() {
-    ensureContentIsAvailable();
-    for (String line : contentLines()) {
-      if (line != null) {
-        String trimmed = line.trim();
-        if (!trimmed.isEmpty() && trimmed.startsWith(ENTERPRISE_PREFIX)) {
-          return trimmed;
-        }
-      }
+  private String ensureContent() {
+    if (!this.loadAttempted) {
+      throw new IllegalStateException("Load has not been attempted.");
     }
-    throw new IllegalStateException("Enterprise line not found in cached content.");
-  }
-
-  public ArrayList<String> galaxyLines() {
-    ensureContentIsAvailable();
-    ArrayList<String> lines = new ArrayList<>();
-    for (String line : contentLines()) {
-      if (line != null) {
-        String trimmed = line.trim();
-        if (!trimmed.isEmpty() && trimmed.startsWith(QUADRANT_PREFIX)) {
-          lines.add(trimmed);
-        }
-      }
+    if (!this.loadSucceeded || this.content == null || this.content.isBlank()) {
+      throw new IllegalStateException("No content available to parse.");
     }
-    return lines;
+    return this.content;
   }
 
-  public int parseLineForEnergy(String line) throws IOException {
-    return parseIntegerToken(line, "e:");
+  private List<String> splitLines(String text) {
+    return List.of(text.split("\\R"));
   }
 
-  public int parseLineForShields(String line) throws IOException {
-    return parseIntegerToken(line, "s:");
-  }
-
-  public int parseLineForTorpedoes(String line) throws IOException {
-    return parseIntegerToken(line, "t:");
-  }
-
-  private void ensureContentIsAvailable() {
-    if (this.cachedContent == null) {
-      throw new IllegalStateException("No cached content available. Call load() and ensure it succeeds first.");
-    }
-  }
-
-  private List<String> contentLines() {
-    return List.of(this.cachedContent.split("\\R", -1));
-  }
-
-  private int parseIntegerToken(String line, String token) throws IOException {
+  private int parseIntegerValue(String line, String token) throws IOException {
     if (line == null) {
-      throw new IOException("Line cannot be null.");
+      throw new IOException("Line must not be null.");
     }
-    String trimmed = line.trim();
-    int index = trimmed.indexOf(token);
-    if (index < 0) {
-      throw new IOException("Token '" + token + "' missing from line.");
+    int tokenIndex = line.indexOf(token);
+    if (tokenIndex < 0) {
+      throw new IOException("Missing token '" + token + "' in line: " + line);
     }
-    int start = index + token.length();
+    int start = tokenIndex + token.length();
+    while (start < line.length() && Character.isWhitespace(line.charAt(start))) {
+      start++;
+    }
+    if (start >= line.length()) {
+      throw new IOException("Missing numeric value for token '" + token + "' in line: " + line);
+    }
     int end = start;
-    while (end < trimmed.length() && Character.isDigit(trimmed.charAt(end))) {
+    if (line.charAt(end) == '-' || line.charAt(end) == '+') {
       end++;
     }
-    if (end == start) {
-      throw new IOException("No digits found for token '" + token + "'.");
+    while (end < line.length() && Character.isDigit(line.charAt(end))) {
+      end++;
     }
-    String number = trimmed.substring(start, end);
+    if (end <= start || (end == start + 1 && (line.charAt(start) == '-' || line.charAt(start) == '+'))) {
+      throw new IOException("No numeric value for token '" + token + "' in line: " + line);
+    }
+    String number = line.substring(start, end);
     try {
       return Integer.parseInt(number);
-    } catch (NumberFormatException e) {
-      throw new IOException("Unable to parse integer for token '" + token + "'.", e);
+    } catch (NumberFormatException ex) {
+      throw new IOException("Invalid integer for token '" + token + "' in line: " + line, ex);
     }
   }
 
-  private int parseDigit(char value) throws IOException {
-    if (!Character.isDigit(value)) {
-      throw new IOException("Quadrant symbol contains non-digit character.");
+  private int parseDigit(char digit) throws IOException {
+    if (!Character.isDigit(digit)) {
+      throw new IOException("Invalid digit in symbol: " + digit);
     }
-    return Character.digit(value, 10);
   }
 }
