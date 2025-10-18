@@ -7,12 +7,13 @@ import javax.swing.JPanel;
 import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.Pallete;
+import sttrswing.view.View;
 import sttrswing.view.guicomponents.DirectionButton;
 
 /**
  * Panel that allows the player to fire torpedoes in any of the eight compass directions.
  */
-public class Torpedo extends JPanel {
+public class Torpedo extends View {
 
   private static final int ROWS = 3;
   private static final int COLUMNS = 3;
@@ -27,6 +28,7 @@ public class Torpedo extends JPanel {
    * @param controller the controller used to restore the default view
    */
   public Torpedo(final GameModel game, final GameController controller) {
+    super("Torpedo Controls");
     this.game = Objects.requireNonNull(game, "game");
     this.controller = Objects.requireNonNull(controller, "controller");
 
@@ -58,7 +60,7 @@ public class Torpedo extends JPanel {
     button.setFocusPainted(false);
     ActionListener listener = event -> {
       game.fireTorpedo(course);
-      controller.setDefaultView(game);
+      controller.setDefaultView(new QuadrantNavigation(game, controller));
     };
     button.addActionListener(listener);
     return button;

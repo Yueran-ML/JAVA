@@ -4,6 +4,7 @@ import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.panels.EnterpriseStatus;
 import sttrswing.view.panels.Options;
+import sttrswing.view.panels.QuadrantNavigation;
 import sttrswing.view.panels.QuadrantScan;
 
 import javax.swing.BorderFactory;
@@ -58,29 +59,49 @@ public class StartView extends View {
     }
 
     private View createWelcomePanel(GameModel game, GameController controller) {
-        View panel = new View(WELCOME_PANEL_TITLE);
-        panel.setLayout(new BorderLayout());
-
-        JLabel label = new JLabel(WELCOME_LABEL_TEXT, SwingConstants.CENTER);
-        label.setFont(new Font("Monospaced", Font.BOLD, 24));
-        label.setForeground(Pallete.GREENTERMINAL.color());
-        panel.add(label, BorderLayout.NORTH);
-
-        this.textArea = new JTextArea();
-        this.textArea.setEditable(false);
-        this.textArea.setBackground(Pallete.BLACK.color());
-        this.textArea.setForeground(Pallete.GREENPALE.color());
-        this.textArea.setFont(new Font("Monospaced", Font.BOLD, 16));
-        this.textArea.setLineWrap(true);
-        this.textArea.setWrapStyleWord(true);
-        this.textArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        this.textArea.setText(WELCOME_MESSAGE);
-        panel.add(this.textArea, BorderLayout.CENTER);
-
-        this.button = panel.buildButton("START", e -> controller.setDefaultView(game));
-        this.button.setFocusPainted(false);
-        panel.add(this.button, BorderLayout.SOUTH);
-
+        WelcomeView panel = new WelcomeView(WELCOME_PANEL_TITLE, game, controller);
+        this.textArea = panel.getTextArea();
+        this.button = panel.getButton();
         return panel;
+    }
+
+    private static class WelcomeView extends View {
+
+        private final JButton button;
+        private final JTextArea textArea;
+
+        WelcomeView(String title, GameModel game, GameController controller) {
+            super(title);
+            this.setLayout(new BorderLayout());
+
+            JLabel label = new JLabel(WELCOME_LABEL_TEXT, SwingConstants.CENTER);
+            label.setFont(new Font("Monospaced", Font.BOLD, 24));
+            label.setForeground(Pallete.GREENTERMINAL.color());
+            this.add(label, BorderLayout.NORTH);
+
+            this.textArea = new JTextArea();
+            this.textArea.setEditable(false);
+            this.textArea.setBackground(Pallete.BLACK.color());
+            this.textArea.setForeground(Pallete.GREENPALE.color());
+            this.textArea.setFont(new Font("Monospaced", Font.BOLD, 16));
+            this.textArea.setLineWrap(true);
+            this.textArea.setWrapStyleWord(true);
+            this.textArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            this.textArea.setText(WELCOME_MESSAGE);
+            this.add(this.textArea, BorderLayout.CENTER);
+
+            this.button = this.buildButton("START",
+                    e -> controller.setDefaultView(new QuadrantNavigation(game, controller)));
+            this.button.setFocusPainted(false);
+            this.add(this.button, BorderLayout.SOUTH);
+        }
+
+        JButton getButton() {
+            return this.button;
+        }
+
+        JTextArea getTextArea() {
+            return this.textArea;
+        }
     }
 }

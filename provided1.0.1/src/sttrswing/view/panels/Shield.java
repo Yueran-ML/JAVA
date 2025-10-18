@@ -52,7 +52,7 @@ public class Shield extends View {
         ActionListener listener = event -> {
             int selectedEnergy = slider.getSelectedValue();
             game.shields(selectedEnergy);
-            controller.setDefaultView(game);
+            controller.setDefaultView(new QuadrantNavigation(game, controller));
         };
         adjustButton.addActionListener(listener);
         trackButton(adjustButton);

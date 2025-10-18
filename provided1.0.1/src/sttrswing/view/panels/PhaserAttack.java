@@ -4,16 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.util.Objects;
 import javax.swing.JButton;
-import javax.swing.JPanel;
 import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.Pallete;
+import sttrswing.view.View;
 import sttrswing.view.guicomponents.Slider;
 
 /**
  * Panel that allows the player to allocate energy to the starship's phasers and fire them.
  */
-public class PhaserAttack extends JPanel {
+public class PhaserAttack extends View {
 
   private static final int DEFAULT_INCREMENT = 100;
 
@@ -28,6 +28,7 @@ public class PhaserAttack extends JPanel {
    * @param controller the controller used to restore the default view
    */
   public PhaserAttack(final GameModel game, final GameController controller) {
+    super("Phaser Controls");
     this.game = Objects.requireNonNull(game, "game");
     this.controller = Objects.requireNonNull(controller, "controller");
 
@@ -50,7 +51,7 @@ public class PhaserAttack extends JPanel {
     ActionListener listener = event -> {
       int selectedEnergy = slider.getSelectedValue();
       game.firePhasers(selectedEnergy);
-      controller.setDefaultView(game);
+      controller.setDefaultView(new QuadrantNavigation(game, controller));
     };
     fireButton.addActionListener(listener);
     return fireButton;

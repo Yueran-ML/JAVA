@@ -28,6 +28,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class GameController extends JFrame {
 
@@ -164,7 +165,9 @@ public class GameController extends JFrame {
         setView(shieldLayout);
     }
 
-    public void setDefaultView(GameModel game) {
+    public void setDefaultView(View view) {
+        Objects.requireNonNull(view, "view");
+        GameModel game = this.game;
         if (game.hasWon()) {
             setWinGameView(game);
             return;
@@ -178,7 +181,7 @@ public class GameController extends JFrame {
         StandardLayoutView defaultLayout = new StandardLayoutView("Default");
         defaultLayout.addViewPanel(new QuadrantScan(game))
                 .addViewPanel(new EnterpriseStatus(game))
-                .addViewPanel(new QuadrantNavigation(game, this))
+                .addViewPanel(view)
                 .addViewPanel(new Options(game, this));
         setView(defaultLayout);
     }
@@ -320,7 +323,7 @@ public class GameController extends JFrame {
             Enterprise enterprise = loadedState.enterprise();
             Galaxy galaxy = loadedState.galaxy();
             this.game.load(enterprise, galaxy);
-            setDefaultView(this.game);
+            setDefaultView(new QuadrantNavigation(this.game, this));
             JOptionPane.showMessageDialog(this,
                     "Game loaded successfully.",
                     "Load Game",
