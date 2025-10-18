@@ -25,7 +25,7 @@ public class EnterpriseTest {
     assertEquals(10, enterprise.torpedoAmmo());
     assertTrue(enterprise.isAlive());
     assertEquals(Faction.FEDERATION, enterprise.faction());
-    assertEquals("(E)", enterprise.symbol());
+    assertEquals("{Ë}", enterprise.symbol());
   }
 
   @Test
@@ -47,7 +47,7 @@ public class EnterpriseTest {
     assertEquals(shields, enterprise.shields());
     assertEquals(torpedoes, enterprise.torpedoAmmo());
     assertTrue(enterprise.isAlive());
-    assertEquals("(E)", enterprise.symbol());
+    assertEquals("{Ë}", enterprise.symbol());
   }
 
   @Test
@@ -367,7 +367,7 @@ public class EnterpriseTest {
     String symbol = enterprise.symbol();
 
     // Assert
-    assertEquals("(E)", symbol);
+    assertEquals("{Ë}", symbol);
   }
 
   @Test

@@ -86,7 +86,7 @@ public class QuadrantTest {
     assertEquals(2, starbases.size());
     assertEquals(3, klingons.size());
     assertEquals(4, stars.size());
-    assertEquals("432", quadrant.symbol());
+    assertEquals("423", quadrant.symbol());
 
     Set<String> positions = new HashSet<>();
     for (Starbase starbase : starbases) {
