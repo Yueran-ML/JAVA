@@ -13,12 +13,13 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.Objects;
 
 /**
  * {@inheritDoc}
  */
-public class StartView extends StandardLayoutView {
+public class StartView extends View {
 
     private static final String TITLE = "Welcome";
     private static final String WELCOME_PANEL_TITLE = "Welcome";
@@ -35,12 +36,17 @@ public class StartView extends StandardLayoutView {
         GameModel gameModel = Objects.requireNonNull(game, "game");
         GameController gameController = Objects.requireNonNull(controller, "controller");
 
-        View welcomePanel = createWelcomePanel(gameModel, gameController);
+        this.setLayout(new GridLayout(2, 2, 10, 10));
 
-        this.addViewPanel(welcomePanel)
-                .addViewPanel(new EnterpriseStatus(gameModel))
-                .addViewPanel(new QuadrantScan(gameModel))
-                .addViewPanel(new Options(gameModel, gameController));
+        View welcomePanel = createWelcomePanel(gameModel, gameController);
+        EnterpriseStatus enterpriseStatus = new EnterpriseStatus(gameModel);
+        QuadrantScan quadrantScan = new QuadrantScan(gameModel);
+        Options options = new Options(gameModel, gameController);
+
+        this.add(welcomePanel);
+        this.add(enterpriseStatus);
+        this.add(quadrantScan);
+        this.add(options);
     }
 
     public JButton getButton() {
