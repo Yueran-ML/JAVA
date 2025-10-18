@@ -5,16 +5,16 @@ import java.awt.event.ActionListener;
 import java.util.Objects;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.Pallete;
+import sttrswing.view.View;
 
 /**
  * Panel that allows the player to initiate warp travel between quadrants.
  */
-public class WarpNavigation extends JPanel {
+public class WarpNavigation extends View {
 
     private static final int ROWS = 4;
     private static final int COLUMNS = 2;
@@ -32,6 +32,7 @@ public class WarpNavigation extends JPanel {
      * @param controller the controller that can switch back to the default view
      */
     public WarpNavigation(GameModel game, GameController controller) {
+        super("Warp Controls");
         this.game = Objects.requireNonNull(game, "game");
         this.controller = Objects.requireNonNull(controller, "controller");
 
@@ -64,7 +65,7 @@ public class WarpNavigation extends JPanel {
                 int course = Integer.parseInt(courseField.getText().trim());
                 double warpFactor = Double.parseDouble(warpFactorField.getText().trim());
                 game.moveBetweenQuadrants(course, warpFactor);
-                controller.setDefaultView(game);
+                controller.setDefaultView(new QuadrantNavigation(game, controller));
             } catch (NumberFormatException ignored) {
                 courseField.setText("");
                 warpFactorField.setText("");
