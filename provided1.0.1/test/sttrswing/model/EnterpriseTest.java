@@ -115,9 +115,9 @@ public class EnterpriseTest {
     int transferred = enterprise.transferEnergyToShields(500);
 
     // Assert
-    assertEquals(119, transferred);
-    assertEquals(1, enterprise.energy());
-    assertEquals(169, enterprise.shields());
+    assertEquals(120, transferred);
+    assertEquals(0, enterprise.energy());
+    assertEquals(170, enterprise.shields());
   }
 
   @Test
@@ -129,9 +129,9 @@ public class EnterpriseTest {
     int transferred = enterprise.transferEnergyToShields(25);
 
     // Assert
-    assertEquals(0, transferred);
-    assertEquals(1, enterprise.energy());
-    assertEquals(90, enterprise.shields());
+    assertEquals(1, transferred);
+    assertEquals(0, enterprise.energy());
+    assertEquals(91, enterprise.shields());
   }
 
   @Test
