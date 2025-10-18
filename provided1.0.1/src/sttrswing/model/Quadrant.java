@@ -118,38 +118,34 @@ public class Quadrant implements Hittable, HasPosition {
         @todo change this test code to randomise the location of each the objects in the Quadrant
          */
     for (int starbase = 0; starbase < starbases; starbase++) {
-      XyPair position = this.getRandomEmptySector();
+      XyPair position = this.getNextEmptySector();
+      if (position == null) {
+        break;
+      }
       this.starbases.add(new Starbase(position.getX(), position.getY()));
     }
     for (int klingon = 0; klingon < klingons; klingon++) {
-      XyPair position = this.getRandomEmptySector();
+      XyPair position = this.getNextEmptySector();
+      if (position == null) {
+        break;
+      }
       this.klingons.add(new Klingon(position.getX(), position.getY()));
     }
     for (int star = 0; star < stars; star++) {
-      XyPair position = this.getRandomEmptySector();
+      XyPair position = this.getNextEmptySector();
+      if (position == null) {
+        break;
+      }
       this.stars.add(new Star(position.getX(), position.getY()));
     }
   }
 
   public XyPair getRandomEmptySector() {
-    final List<XyPair> fullSectors = new ArrayList<>();
-
-    for (Star star : this.stars) {
-      fullSectors.add(new XyPair(star.getX(), star.getY()));
-    }
-    for (Klingon klingon : this.klingons) {
-      fullSectors.add(new XyPair(klingon.getX(), klingon.getY()));
-    }
-    for (Starbase starbase : this.starbases) {
-      fullSectors.add(new XyPair(starbase.getX(), starbase.getY()));
-    }
-
     final List<XyPair> emptySectors = new ArrayList<>();
     for (int y = 0; y < this.maxRows; y++) {
       for (int x = 0; x < this.maxCols; x++) {
-        XyPair option = new XyPair(x, y);
-        if (!fullSectors.contains(option)) {
-          emptySectors.add(option);
+        if (this.getEntityAt(x, y) == null) {
+          emptySectors.add(new XyPair(x, y));
         }
       }
     }
@@ -158,6 +154,17 @@ public class Quadrant implements Hittable, HasPosition {
     }
     Random random = new Random();
     return emptySectors.get(random.nextInt(emptySectors.size()));
+  }
+
+  private XyPair getNextEmptySector() {
+    for (int y = 0; y < this.maxRows; y++) {
+      for (int x = 0; x < this.maxCols; x++) {
+        if (this.getEntityAt(x, y) == null) {
+          return new XyPair(x, y);
+        }
+      }
+    }
+    return null;
   }
 
   public List<Klingon> klingons() {

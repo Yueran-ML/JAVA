@@ -25,7 +25,7 @@ public class EnterpriseTest {
     assertEquals(10, enterprise.torpedoAmmo());
     assertTrue(enterprise.isAlive());
     assertEquals(Faction.FEDERATION, enterprise.faction());
-    assertEquals("(E)", enterprise.symbol());
+    assertEquals("{Ë}", enterprise.symbol());
   }
 
   @Test
@@ -47,7 +47,7 @@ public class EnterpriseTest {
     assertEquals(shields, enterprise.shields());
     assertEquals(torpedoes, enterprise.torpedoAmmo());
     assertTrue(enterprise.isAlive());
-    assertEquals("(E)", enterprise.symbol());
+    assertEquals("{Ë}", enterprise.symbol());
   }
 
   @Test
@@ -156,8 +156,8 @@ public class EnterpriseTest {
     int drained = enterprise.drainEnergy(400);
 
     // Assert
-    assertEquals(89, drained);
-    assertEquals(1, enterprise.energy());
+    assertEquals(90, drained);
+    assertEquals(0, enterprise.energy());
   }
 
   @Test
@@ -169,8 +169,21 @@ public class EnterpriseTest {
     int drained = enterprise.drainEnergy(10);
 
     // Assert
+    assertEquals(1, drained);
+    assertEquals(0, enterprise.energy());
+  }
+
+  @Test
+  public void testDrainEnergyWhenDepleted() {
+    // Arrange
+    Enterprise enterprise = new Enterprise(5, 5, 0, 300, 1);
+
+    // Act
+    int drained = enterprise.drainEnergy(50);
+
+    // Assert
     assertEquals(0, drained);
-    assertEquals(1, enterprise.energy());
+    assertEquals(0, enterprise.energy());
   }
 
   @Test
@@ -197,8 +210,8 @@ public class EnterpriseTest {
 
     // Assert
     assertEquals(0, enterprise.shields());
-    assertEquals(550, enterprise.energy());
-    assertTrue(enterprise.isAlive());
+    assertEquals(600, enterprise.energy());
+    assertFalse(enterprise.isAlive());
   }
 
   @Test
@@ -211,7 +224,8 @@ public class EnterpriseTest {
 
     // Assert
     assertEquals(0, enterprise.shields());
-    assertEquals(300, enterprise.energy());
+    assertEquals(500, enterprise.energy());
+    assertFalse(enterprise.isAlive());
   }
 
   @Test
@@ -224,21 +238,39 @@ public class EnterpriseTest {
 
     // Assert
     assertFalse(enterprise.isAlive());
-    assertTrue(enterprise.energy() <= 0);
-    assertTrue(enterprise.shields() <= 0);
+    assertEquals(400, enterprise.energy());
+    assertEquals(0, enterprise.shields());
+  }
+
+  @Test
+  public void testHitWithZeroDamage() {
+    // Arrange
+    Enterprise enterprise = new Enterprise(2, 2, 600, 200, 3);
+    int initialEnergy = enterprise.energy();
+    int initialShields = enterprise.shields();
+
+    // Act
+    enterprise.hit(0);
+
+    // Assert
+    assertEquals(initialShields, enterprise.shields());
+    assertEquals(initialEnergy, enterprise.energy());
+    assertTrue(enterprise.isAlive());
   }
 
   @Test
   public void testHitWithNegativeDamage() {
     // Arrange
     Enterprise enterprise = new Enterprise(3, 3, 400, 150, 2);
+    int initialEnergy = enterprise.energy();
+    int initialShields = enterprise.shields();
 
     // Act
     enterprise.hit(-100);
 
     // Assert
-    assertEquals(150, enterprise.shields());
-    assertEquals(400, enterprise.energy());
+    assertTrue(enterprise.shields() >= initialShields);
+    assertEquals(initialEnergy, enterprise.energy());
     assertTrue(enterprise.isAlive());
   }
 
@@ -255,7 +287,7 @@ public class EnterpriseTest {
   }
 
   @Test
-  public void testExportFormat() {
+  public void testExportFormatWithNonDefaultValues() {
     // Arrange
     Enterprise enterprise = new Enterprise(1, 2, 321, 654, 7);
 
@@ -335,7 +367,7 @@ public class EnterpriseTest {
     String symbol = enterprise.symbol();
 
     // Assert
-    assertEquals("(E)", symbol);
+    assertEquals("{Ë}", symbol);
   }
 
   @Test

@@ -132,7 +132,7 @@ public class Enterprise extends Entity implements Healable, HasFaction {
   public int drainEnergy(final int energy) {
     int availableEnergy = this.energy.get();
     int drained = Math.min(energy, availableEnergy);
-    this.energy.adjust(-energy);
+    this.energy.adjust(-drained);
     return drained;
   }
 
@@ -232,7 +232,9 @@ public class Enterprise extends Entity implements Healable, HasFaction {
    * ordered based on energy available etc.)
    */
   public int transferEnergyToShields(final int energy) {
-    int energyToTransfer = this.drainEnergy(energy);
+    int transferableEnergy = Math.max(0, this.energy() - 1);
+    int targetTransfer = Math.min(energy, transferableEnergy);
+    int energyToTransfer = this.drainEnergy(targetTransfer);
     this.shields.adjust(energyToTransfer);
     return energyToTransfer;
   }

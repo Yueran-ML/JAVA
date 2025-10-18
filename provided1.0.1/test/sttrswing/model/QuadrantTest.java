@@ -3,6 +3,8 @@ package sttrswing.model;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -56,6 +58,21 @@ public class QuadrantTest {
   }
 
   @Test
+  public void testConstructorRandomness() {
+    // Arrange
+    Set<String> signatures = new HashSet<>();
+
+    // Act
+    for (int i = 0; i < 20; i++) {
+      Quadrant quadrant = new Quadrant(5, 5);
+      signatures.add(layoutSignature(quadrant));
+    }
+
+    // Assert
+    assertTrue("Expected at least two different quadrant layouts", signatures.size() > 1);
+  }
+
+  @Test
   public void testConstructorEntityPlacement() {
     // Arrange
     Quadrant quadrant = new Quadrant(0, 0, 2, 3, 4);
@@ -69,7 +86,7 @@ public class QuadrantTest {
     assertEquals(2, starbases.size());
     assertEquals(3, klingons.size());
     assertEquals(4, stars.size());
-    assertEquals("432", quadrant.symbol());
+    assertEquals("423", quadrant.symbol());
 
     Set<String> positions = new HashSet<>();
     for (Starbase starbase : starbases) {
@@ -88,6 +105,26 @@ public class QuadrantTest {
       assertTrue(star.getY() >= 0 && star.getY() < 8);
     }
     assertEquals(2 + 3 + 4, positions.size());
+  }
+
+  @Test
+  public void testGetEntitiesSize() {
+    // Arrange
+    Quadrant quadrant = new Quadrant(0, 0, 3, 2, 4);
+
+    // Act
+    int fromLists = quadrant.starbaseCount() + quadrant.klingonCount() + quadrant.starCount();
+    int counted = 0;
+    for (int y = 0; y < 8; y++) {
+      for (int x = 0; x < 8; x++) {
+        if (quadrant.getEntityAt(x, y) != null) {
+          counted += 1;
+        }
+      }
+    }
+
+    // Assert
+    assertEquals(fromLists, counted);
   }
 
   @Test
@@ -211,6 +248,8 @@ public class QuadrantTest {
     assertEquals(4, klingons.size());
     for (Klingon klingon : klingons) {
       assertNotNull(klingon);
+      assertTrue(klingon instanceof Klingon);
+      assertSame(klingon, quadrant.getEntityAt(klingon.getX(), klingon.getY()));
     }
   }
 
@@ -226,6 +265,8 @@ public class QuadrantTest {
     assertEquals(3, starbases.size());
     for (Starbase starbase : starbases) {
       assertNotNull(starbase);
+      assertTrue(starbase instanceof Starbase);
+      assertSame(starbase, quadrant.getEntityAt(starbase.getX(), starbase.getY()));
     }
   }
 
@@ -241,6 +282,8 @@ public class QuadrantTest {
     assertEquals(5, stars.size());
     for (Star star : stars) {
       assertNotNull(star);
+      assertTrue(star instanceof Star);
+      assertSame(star, quadrant.getEntityAt(star.getX(), star.getY()));
     }
   }
 
@@ -288,6 +331,22 @@ public class QuadrantTest {
   }
 
   @Test
+  public void testRemoveMarkedEntitiesUpdatesGetEntityAt() {
+    // Arrange
+    Quadrant quadrant = new Quadrant(0, 0, 1, 1, 0);
+    Starbase starbase = quadrant.starbases().get(0);
+    int x = starbase.getX();
+    int y = starbase.getY();
+
+    // Act
+    starbase.remove();
+    quadrant.cleanup();
+
+    // Assert
+    assertNull(quadrant.getEntityAt(x, y));
+  }
+
+  @Test
   public void testCleanupWhenNoneMarkedDoesNothing() {
     // Arrange
     Quadrant quadrant = new Quadrant(0, 0, 1, 1, 1);
@@ -300,6 +359,38 @@ public class QuadrantTest {
     // Assert
     assertEquals(klingonsBefore, quadrant.klingonCount());
     assertEquals(starbasesBefore, quadrant.starbaseCount());
+  }
+
+  @Test
+  public void testSymbolUpdatesAfterRemoval() {
+    // Arrange
+    Quadrant quadrant = new Quadrant(0, 0, 1, 2, 1);
+    String initialSymbol = quadrant.symbol();
+
+    // Act
+    quadrant.klingons().get(0).hit(400);
+    quadrant.cleanup();
+    String updatedSymbol = quadrant.symbol();
+
+    // Assert
+    assertEquals("111", updatedSymbol);
+    assertNotEquals(initialSymbol, updatedSymbol);
+  }
+
+  @Test
+  public void testToStringUpdatesAfterRemoval() {
+    // Arrange
+    Quadrant quadrant = new Quadrant(0, 0, 1, 2, 3);
+    String initial = quadrant.toString();
+
+    // Act
+    quadrant.klingons().get(0).hit(400);
+    quadrant.cleanup();
+    String updated = quadrant.toString();
+
+    // Assert
+    assertTrue(updated.contains("Enemies: 1"));
+    assertNotEquals(initial, updated);
   }
 
   @Test
@@ -317,6 +408,26 @@ public class QuadrantTest {
     // Assert
     assertEquals(firstEnergy - 50, getEnergy(first));
     assertEquals(secondEnergy - 50, getEnergy(second));
+  }
+
+  @Test
+  public void testHitDamagesAllKlingonsEqually() {
+    // Arrange
+    Quadrant quadrant = new Quadrant(0, 0, 0, 3, 0);
+    List<Integer> before = new ArrayList<>();
+    for (Klingon klingon : quadrant.klingons()) {
+      before.add(getEnergy(klingon));
+    }
+
+    // Act
+    quadrant.hit(60);
+
+    // Assert
+    int expectedDrop = before.get(0) - getEnergy(quadrant.klingons().get(0));
+    for (int i = 0; i < quadrant.klingons().size(); i++) {
+      int delta = before.get(i) - getEnergy(quadrant.klingons().get(i));
+      assertEquals(expectedDrop, delta);
+    }
   }
 
   @Test
@@ -338,14 +449,18 @@ public class QuadrantTest {
   public void testHitWithZeroDamage() {
     // Arrange
     Quadrant quadrant = new Quadrant(0, 0, 0, 2, 0);
-    Klingon klingon = quadrant.klingons().get(0);
-    int energy = getEnergy(klingon);
+    List<Integer> energies = new ArrayList<>();
+    for (Klingon klingon : quadrant.klingons()) {
+      energies.add(getEnergy(klingon));
+    }
 
     // Act
     quadrant.hit(0);
 
     // Assert
-    assertEquals(energy, getEnergy(klingon));
+    for (int i = 0; i < quadrant.klingons().size(); i++) {
+      assertEquals(energies.get(i).intValue(), getEnergy(quadrant.klingons().get(i)));
+    }
     assertEquals(0, quadrant.klingonsMarkedForRemovalCount());
   }
 
@@ -383,7 +498,7 @@ public class QuadrantTest {
   }
 
   @Test
-  public void testGetRandomEmptySectorReturnsValidCoordinates() {
+  public void testRandomEmptySectorMultipleCalls() {
     // Arrange
     Quadrant quadrant = new Quadrant(0, 0, 1, 1, 1);
 
@@ -433,6 +548,21 @@ public class QuadrantTest {
     assertTrue(description.contains("Stars: 3"));
     assertTrue(description.contains("Enemies: 1"));
     assertTrue(description.contains("Starbases: 2"));
+  }
+
+  private String layoutSignature(Quadrant quadrant) {
+    List<String> entries = new ArrayList<>();
+    for (Starbase starbase : quadrant.starbases()) {
+      entries.add("B" + starbase.getX() + "," + starbase.getY());
+    }
+    for (Klingon klingon : quadrant.klingons()) {
+      entries.add("K" + klingon.getX() + "," + klingon.getY());
+    }
+    for (Star star : quadrant.stars()) {
+      entries.add("S" + star.getX() + "," + star.getY());
+    }
+    Collections.sort(entries);
+    return entries.toString();
   }
 
   private int getEnergy(Klingon klingon) {
