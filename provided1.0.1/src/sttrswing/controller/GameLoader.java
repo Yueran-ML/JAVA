@@ -1,8 +1,4 @@
-package sttrswing.controller;
-
-import sttrswing.model.Enterprise;
-import sttrswing.model.Galaxy;
-import sttrswing.model.Quadrant;
+package sttrswing.model;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,7 +20,7 @@ public class GameLoader {
 
   public GameLoader(String path) {
     if (path == null || path.isBlank()) {
-      throw new IllegalArgumentException("Path must not be empty.");
+      throw new IllegalArgumentException("Path must not be null or blank.");
     }
     this.path = path;
   }
@@ -212,6 +208,5 @@ public class GameLoader {
     if (!Character.isDigit(digit)) {
       throw new IOException("Invalid digit in symbol: " + digit);
     }
-    return Character.digit(digit, 10);
   }
 }
